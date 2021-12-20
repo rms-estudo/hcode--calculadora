@@ -12,6 +12,7 @@ class CalcController {
     this._currentDate
     this.initialize()
     this.initButtonsEvent()
+    this.initKeyboard()
   }
 
   get displayCalc() {
@@ -163,9 +164,6 @@ class CalcController {
         // troca o operador
         this.setLastOperation(value)
 
-      } else if (isNaN(value)) {
-
-
       } else {
         this.pushOperation(value)
         this.setLastNumberToDisplay()
@@ -177,7 +175,7 @@ class CalcController {
 
       } else {
         let newValue = this.getLastButtonClicked().toString() + value.toString()
-        this.setLastOperation(parseInt(newValue))
+        this.setLastOperation(newValue)
 
         this.setLastNumberToDisplay()
       }
@@ -188,6 +186,8 @@ class CalcController {
 
   clearAll() {
     this._operation = []
+    this._lastNumber = ''
+    this._lastOperator = ''
     this.setLastNumberToDisplay()
   }
 
@@ -199,6 +199,22 @@ class CalcController {
 
   setError() {
     this.displayCalc = 'Error'
+  }
+
+  addDot() {
+    let lastOperation = this.getLastButtonClicked()
+
+    if (typeof lastOperation === 'string' && lastOperation.split('').indexOf('.') > -1) {
+      return
+    }
+
+    if (this.isOperator(lastOperation) || !lastOperation) {
+      this.pushOperation('0.')
+    } else {
+      this.setLastOperation(lastOperation.toString() + '.')
+    }
+
+    this.setLastNumberToDisplay()
   }
 
   execBtn(value) {
@@ -228,7 +244,7 @@ class CalcController {
         this.calc()
         break;
       case 'ponto':
-        this.addOperation('.')
+        this.addDot('.')
         break;
       case '0':
       case '1':
@@ -246,6 +262,52 @@ class CalcController {
         this.setError()
         break;
     }
+  }
+
+  initKeyboard() {
+    document.addEventListener('keyup', e => {
+
+      switch (e.key) {
+        case 'Escape':
+          this.clearAll()
+          break;
+        case 'Backspace':
+          this.clearEntry()
+          break;
+        case '+':
+        case '-':
+        case '/':
+        case '*':
+        case '%':
+          this.addOperation(e.key)
+          break;
+
+        case 'Enter':
+        case '=':
+          this.calc()
+          break;
+        case '.':
+        case ',':
+          this.addDot('.')
+          break;
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+          this.addOperation(parseInt(e.key))
+          break;
+        default:
+
+          break;
+      }
+
+    })
   }
 
   initButtonsEvent() {
